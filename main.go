@@ -4,15 +4,20 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 
+	"github.com/groggygopher/oyster/handlers"
 	"github.com/groggygopher/oyster/register"
 	"github.com/groggygopher/oyster/rule"
+	"github.com/groggygopher/oyster/session"
 )
 
 var (
 	csvFile  = flag.String("csv_file", "", "The CSV file to import")
 	ruleFile = flag.String("rule_file", "", "The JSON encoded rule file")
+
+	port = flag.Int("port", 8080, "The port to serve HTTP on")
 )
 
 func main() {
@@ -84,4 +89,10 @@ func main() {
 	// if err != nil {
 	// 	return
 	// }
+
+	sessMgr := session.NewManager()
+	http.Handle("/session", &handlers.SessionHandler{Manager: sessMgr})
+
+	http.Handle("/", http.FileServer(http.Dir("html")))
+	fmt.Println(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
