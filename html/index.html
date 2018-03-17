@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html  ng-app="ngAppOyster">
+	<head>
+		<link rel="stylesheet" type="text/css" href="views/css/styles.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" data-semver="2.1.1" data-require="jquery@*"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-route.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+
+		<link href="favicon.ico" rel="icon" type="image/x-icon" />
+		<title>Oyster</title>
+	</head>
+
+	<body>
+		<div style="background-color: #46e2d8;">
+			<span id="main-header">Oyster Money Management</span>
+			<div class="navbar" style="display: inline-block;" ng-controller="navBarController">
+				<ul class="nav nav-pills" ng-if="user">
+					<li class="nav-link" role="presentation"><a href="#/overview">Overview</a></li>
+				</ul>
+			</div>
+
+			<div ng-controller="logoutController" style="display: inline-block; float: right">
+				<ul class="nav nav-pills">
+					<li title="Logout" ng-show="user" role="presentation"><a href="#" ng-click="logout()"">Logout</a></li>
+				</ul>
+			</div>
+
+		</div>
+
+		<div ng-view></div>
+
+		<script src="app.js"></script>
+		<script src="controllers/overviewController.js"></script>
+		<script src="controllers/loginController.js"></script>
+	</body>
+</html>
+				
