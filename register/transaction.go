@@ -11,12 +11,11 @@ import (
 
 // Transaction is a single financial transaction mapped to zero or more Categories.
 type Transaction struct {
-	ID          string
-	Account     string
-	Description string
-	Amount      float64
-	Date        *time.Time
-	Category    []*Category
+	ID          string      `json:"id"`
+	Description string      `json:"description"`
+	Amount      float64     `json:"amount"`
+	Date        *time.Time  `json:"date"`
+	Category    []*Category `json:"categories"`
 }
 
 // String returns a quick representation of this Transaction.

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -12,26 +13,35 @@ const sessCookieKey = "session"
 
 func getCookie(req *http.Request) (string, bool) {
 	for _, c := range req.Cookies() {
-		if c.Name == sessCookieKey {
+		if c.Name == sessCookieKey && len(c.Value) > 0 {
 			return c.Value, true
 		}
 	}
 	return "", false
 }
 
+// RequestUser returns the authenticated User given by the request's cookies.
+func RequestUser(man *session.Manager, req *http.Request) *session.User {
+	c, ok := getCookie(req)
+	if !ok {
+		return nil
+	}
+	return man.ValidSession(c)
+}
+
+// NewSessionHandler returns a new SessionHandler given a session.Manager.
+func NewSessionHandler(man *session.Manager) *SessionHandler {
+	return &SessionHandler{manager: man}
+}
+
 // SessionHandler manages the sessions of all users and provides an HTTP API to
 // support those actions.
 type SessionHandler struct {
-	Manager *session.Manager
+	manager *session.Manager
 }
 
 func (sh *SessionHandler) checkActiveSession(w http.ResponseWriter, req *http.Request) {
-	c, ok := getCookie(req)
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	usr := sh.Manager.ValidSession(c)
+	usr := RequestUser(sh.manager, req)
 	if usr == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -55,7 +65,13 @@ func (sh *SessionHandler) login(w http.ResponseWriter, req *http.Request) {
 		log.Printf("error: decode user request body: %v", err)
 		return
 	}
-	usr, c := sh.Manager.Login(body.Name, body.Password)
+	usr, c, err := sh.manager.Login(body.Name, body.Password)
+	if err != nil {
+		log.Printf("error: manager.Login(%s): %v", body.Name, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("An internal error occurred"))
+		return
+	}
 	if usr == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -78,8 +94,9 @@ func (sh *SessionHandler) logout(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	if ok := sh.Manager.Logout(c); !ok {
-		w.WriteHeader(http.StatusUnauthorized)
+	if err := sh.manager.Logout(c); err != nil {
+		log.Printf("manager.Logout: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{Name: sessCookieKey})
@@ -101,5 +118,6 @@ func (sh *SessionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		sh.logout(w, req)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(fmt.Sprintf("Unsupported method: %s", req.Method)))
 	}
 }

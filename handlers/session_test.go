@@ -13,8 +13,12 @@ import (
 )
 
 func TestSession(t *testing.T) {
-	sessMgr := session.NewManager()
-	sessHdl := &SessionHandler{Manager: sessMgr}
+	m, err := session.CreateTestManager()
+	if err != nil {
+		t.Fatalf("CreateTestManager: %v", err)
+	}
+
+	sessHdl := NewSessionHandler(m)
 	srv := httptest.NewServer(sessHdl)
 	defer srv.Close()
 
@@ -56,20 +60,20 @@ func TestSession(t *testing.T) {
 	// Login with a bad user.
 	resp, err := client.Post(url, "application/json", bytes.NewReader([]byte(`{"name":"bad","password":"bad"}`)))
 	if err != nil {
-		t.Fatalf("client.Get(%s): %v", url, err)
+		t.Fatalf("client.Post(%s): %v", url, err)
 	}
 	if got, want := resp.StatusCode, http.StatusUnauthorized; got != want {
-		t.Errorf("bad login: GET /session: got: %d, want: %d", got, want)
+		t.Errorf("bad login: POST /session: got: %d, want: %d", got, want)
 	}
 	checkNoUser("bad user attempted")
 
 	// Login with a good user.
 	resp, err = client.Post(url, "application/json", bytes.NewReader([]byte(`{"name":"test","password":"test"}`)))
 	if err != nil {
-		t.Fatalf("client.Get(%s): %v", url, err)
+		t.Fatalf("client.Post(%s): %v", url, err)
 	}
 	if got, want := resp.StatusCode, http.StatusOK; got != want {
-		t.Errorf("good login: GET /session: got: %d, want: %d", got, want)
+		t.Fatalf("good login: POST /session: got: %d, want: %d", got, want)
 	}
 	// GET /session with good session.
 	resp, err = client.Get(url)

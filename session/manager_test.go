@@ -1,26 +1,49 @@
 package session
 
 import (
+	"os"
+	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
+
+	"github.com/groggygopher/oyster/register"
 )
 
+func TestGeneratePasskey(t *testing.T) {
+	// Passkey generation should be deterministic for the same input.
+	words := []string{"hello", "", "PASSWORD"}
+	for _, w := range words {
+		pk := generatePasskey(w)
+		for i := 0; i < 10; i++ {
+			if got, want := generatePasskey(w), pk; !reflect.DeepEqual(got, want) {
+				t.Errorf("%s: got: %v, want: %v", w, got, want)
+			}
+		}
+	}
+}
+
 func TestLogout(t *testing.T) {
-	m := NewManager()
+	m, err := CreateTestManager()
+	if err != nil {
+		t.Fatalf("CreateTestManager: %v", err)
+	}
+
 	m.active["test"] = &Session{
 		Start: time.Now(),
 		User: &User{
-			Name: "test",
+			Name:    "test",
+			passkey: []byte("testtesttesttesttesttesttesttest"),
 		},
 	}
-	if got := m.Logout("bad"); got {
-		t.Error("expected false from unknown session")
+	if err := m.Logout("bad"); err == nil {
+		t.Error("expected non-nil error from unknown session")
 	}
-	if got := m.Logout("test"); !got {
-		t.Error("expected true from known session")
+	if err := m.Logout("test"); err != nil {
+		t.Errorf("expected nil error from known session, got: %v", err)
 	}
-	if got := m.Logout("test"); got {
-		t.Error("expected false from logged out session")
+	if err := m.Logout("test"); err == nil {
+		t.Error("expected non-nil error from logged out session")
 	}
 	if got := m.ValidSession("test"); got != nil {
 		t.Error("expected nil from logged out session")
@@ -28,11 +51,16 @@ func TestLogout(t *testing.T) {
 }
 
 func TestValidSession(t *testing.T) {
-	m := NewManager()
+	m, err := CreateTestManager()
+	if err != nil {
+		t.Fatalf("CreateTestManager: %v", err)
+	}
+
 	m.active["test"] = &Session{
 		Start: time.Now(),
 		User: &User{
-			Name: "test",
+			Name:    "test",
+			passkey: []byte("testtesttesttesttesttesttesttest"),
 		},
 	}
 	if got := m.ValidSession("test"); got == nil {
@@ -40,5 +68,38 @@ func TestValidSession(t *testing.T) {
 	}
 	if got := m.ValidSession("bad"); got != nil {
 		t.Error("expected nil from unknown session")
+	}
+}
+
+func TestDecodeEncode(t *testing.T) {
+	passkey := []byte("testtesttesttesttesttesttesttest")
+	usr := &User{
+		Name:    "test",
+		passkey: passkey,
+		transactions: []*register.Transaction{
+			&register.Transaction{
+				Description: "test",
+			},
+		},
+	}
+	saveDir := filepath.Join(os.TempDir(), "oyster-test")
+	if err := os.RemoveAll(saveDir); err != nil {
+		t.Fatalf("os.RemoveAll(%s): %v", saveDir, err)
+	}
+	if err := os.Mkdir(saveDir, os.FileMode(0775)); err != nil {
+		t.Fatalf("os.Mkdir(%s): %v", saveDir, err)
+	}
+	saveFile := filepath.Join(saveDir, "test")
+
+	if err := encodeUser(usr, saveFile); err != nil {
+		t.Fatalf("encodeUser: %v", err)
+	}
+	decUsr, err := decodeUser(saveFile, passkey)
+	if err != nil {
+		t.Fatalf("decodeUser: %v", err)
+	}
+
+	if got, want := decUsr, usr; !reflect.DeepEqual(got, want) {
+		t.Errorf("got: %v, want: %v", got, want)
 	}
 }
