@@ -2,6 +2,7 @@ var myApp = angular.module('ngAppOyster', [
 	'ngRoute',
   'loginModule',
   'overviewModule',
+  'transactionModule',
 ]);
 
 myApp.config(['$routeProvider',
@@ -10,6 +11,13 @@ myApp.config(['$routeProvider',
       when('/overview', {
         templateUrl: 'views/overview.html',
         controller: 'overviewController',
+        resolve: {
+          logincheck: checkLogin,
+        },
+      }).
+      when('/transactions', {
+        templateUrl: 'views/transaction.html',
+        controller: 'transactionController',
         resolve: {
           logincheck: checkLogin,
         },
@@ -48,6 +56,16 @@ myApp.controller("logoutController", function($scope, $http, $location, $rootSco
         $location.url("/login");
         $rootScope.user = null;
       });
+    }
+  };
+});
+
+myApp.directive('customOnChange', function() {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var onChangeFunc = scope.$eval(attrs.customOnChange);
+      element.bind('change', onChangeFunc);
     }
   };
 });

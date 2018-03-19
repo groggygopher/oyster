@@ -5,7 +5,6 @@ module.controller('loginController', ['$scope', '$http', '$rootScope', '$locatio
 	
 	$scope.login = function(user) {
 		$http.post('/session', angular.toJson(user)).success(function(resp) {
-			console.log(resp);
 			$.notify("Welcome, " + resp.name, "success");
 			$rootScope.user = resp;
 			$location.url('/overview');

@@ -21,23 +21,21 @@
       </div>
 
       <ul class="list-unstyled components" ng-controller="navBarController" ng-if="user">
-	      <li>
-	        <a href="#/overview">Overview</a>
-	      </li>
+	      <li><a href="#/overview">Overview</a></li>
+	      <li><a href="#/transactions">Transactions</a></li>
       </ul>
 
       <ul class="list-unstyled components" ng-controller="logoutController" ng-if="user">
-        <li>
-          <a href="#" ng-click="logout()"">Logout</a>
-        </li>
+        <li><a href="#" ng-click="logout()"">Logout</a></li>
       </ul>
 		</div>
 
 		<div id="content" ng-view class="container"></div>
 
 		<script src="app.js"></script>
-		<script src="controllers/overviewController.js"></script>
 		<script src="controllers/loginController.js"></script>
+		<script src="controllers/overviewController.js"></script>
+		<script src="controllers/transactionController.js"></script>
 	</body>
 </html>
 				

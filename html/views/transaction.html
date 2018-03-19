@@ -1,0 +1,29 @@
+<div class="container" >
+  <h2 style="display:inline-block">Transactions</h2>
+
+  <p></p>
+
+  <label class="btn btn-default btn-file">
+      Import New
+      <input type="file" id="file" name="file" custom-on-change="upload" accept=".csv" style="display: none;"/>
+  </label>
+
+  <p ng-bind="message"></p>
+
+  <table class="table" style="width: 100%;">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="trans in transactions">
+        <td>{{formatDate(trans.date)}}</td>
+        <td>{{trans.description}}</td>
+        <td>{{formatCurrency(trans.amount)}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
