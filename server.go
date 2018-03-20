@@ -20,13 +20,31 @@ var (
 	saveDir = flag.String("save_dir", filepath.Join(os.TempDir(), "oyster"), "The directory to save user data")
 )
 
+func createSaveDir(saveDir string) error {
+	fInfo, err := os.Stat(saveDir)
+	if os.IsNotExist(err) {
+		if err := os.MkdirAll(saveDir, 0775); err != nil {
+			return fmt.Errorf("os.MkdirAll(%s): %v", saveDir, err)
+		}
+		return nil
+	}
+	if !fInfo.IsDir() {
+		return fmt.Errorf("%s is a file, not a directory", saveDir)
+	}
+	return nil
+}
+
 func main() {
+	if err := createSaveDir(*saveDir); err != nil {
+		log.Fatalf("createSaveDir: %v", err)
+	}
 	sessMgr := session.NewManager(*saveDir)
 	defer func() {
 		if err := sessMgr.Close(); err != nil {
-			log.Printf("error: sessionManager.Close: %v", err)
+			log.Fatalf("error: sessionManager.Close: %v", err)
 		}
 	}()
+
 	http.Handle("/session", handlers.NewSessionHandler(sessMgr))
 	http.Handle("/upload", handlers.NewUploadHandler(sessMgr))
 	http.Handle("/transactions", handlers.NewTransactionsHandler(sessMgr))
