@@ -152,7 +152,7 @@ func (m *Manager) Register(name, password string) (*User, string, error) {
 	m.Lock()
 	defer m.Unlock()
 
-	errAlreadyExists := fmt.Errorf("there is already a user with name: %s", name)
+	errAlreadyExists := fmt.Errorf("There is already a user with name: %s", name)
 	saveFile := m.userSaveFile(name)
 	if _, err := os.Stat(saveFile); !os.IsNotExist(err) {
 		return nil, "", errAlreadyExists

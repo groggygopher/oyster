@@ -2,6 +2,7 @@ var myApp = angular.module('ngAppOyster', [
 	'ngRoute',
   'loginModule',
   'overviewModule',
+  'registerModule',
   'transactionModule',
 ]);
 
@@ -25,6 +26,10 @@ myApp.config(['$routeProvider',
       when('/login', {
         templateUrl: 'views/login.html',
         controller: 'loginController',
+      }).
+      when('/register', {
+        templateUrl: 'views/register.html',
+        controller: 'registerController',
       }).
       otherwise({
         redirectTo: '/login'
@@ -55,6 +60,8 @@ myApp.controller("logoutController", function($scope, $http, $location, $rootSco
       $http.delete("/session").success(function() {
         $location.url("/login");
         $rootScope.user = null;
+      }).error(function(resp) {
+        $.notify(resp, "error");
       });
     }
   };

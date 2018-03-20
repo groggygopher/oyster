@@ -1,10 +1,8 @@
-/* The login button (id=login-submit). */
-#login-submit{
+.submit{
 	color: white;
 	background: #46e2d8;
 	margin: 10px 0 12px 10%;
 	width: 80%;
-	/*border-color: #ccc;*/
 	height: 40px;
 }
 

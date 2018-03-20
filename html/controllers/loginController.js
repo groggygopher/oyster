@@ -13,4 +13,9 @@ module.controller('loginController', ['$scope', '$http', '$rootScope', '$locatio
 			$rootScope.user = null;
 		});
 	};
+
+	$scope.register = function() {
+		$location.url('/register');
+	}
+
 }]);
