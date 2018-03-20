@@ -23,6 +23,71 @@ func TestGeneratePasskey(t *testing.T) {
 	}
 }
 
+func TestRegister(t *testing.T) {
+	tests := []struct {
+		label      string
+		wantErr    bool
+		saveUser   string
+		activeUser string
+		newUser    string
+	}{
+		// Watch out: Don't use name=test since the test manager already has that.
+		{
+			label:      "no conflict",
+			saveUser:   "test1",
+			activeUser: "test2",
+			newUser:    "test3",
+		},
+		{
+			label:      "save conflict",
+			wantErr:    true,
+			saveUser:   "test3",
+			activeUser: "test2",
+			newUser:    "test3",
+		},
+		{
+			label:      "active conflict",
+			wantErr:    true,
+			saveUser:   "test1",
+			activeUser: "test3",
+			newUser:    "test3",
+		},
+		{
+			label:      "both conflict",
+			wantErr:    true,
+			saveUser:   "test3",
+			activeUser: "test3",
+			newUser:    "test3",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.label, func(t *testing.T) {
+			m, err := CreateTestManager()
+			if err != nil {
+				t.Fatalf("CreateTestManager: %v", err)
+			}
+
+			saveFile := m.userSaveFile(test.saveUser)
+			if _, err := os.Create(saveFile); err != nil {
+				t.Fatalf("os.Create(%s): %v", saveFile, err)
+			}
+
+			m.active["test"] = &Session{
+				Start: time.Now(),
+				User: &User{
+					Name: test.activeUser,
+				},
+			}
+
+			_, _, err = m.Register(test.newUser, "test")
+			if got, want := err != nil, test.wantErr; got != want {
+				t.Errorf("wantErr: err: %v, got: %t, want: %t", err, got, want)
+			}
+		})
+	}
+}
+
 func TestLogout(t *testing.T) {
 	m, err := CreateTestManager()
 	if err != nil {

@@ -54,6 +54,35 @@ func (sh *SessionHandler) checkActiveSession(w http.ResponseWriter, req *http.Re
 	}
 }
 
+func (sh *SessionHandler) register(w http.ResponseWriter, req *http.Request) {
+	body := &struct {
+		Name     string `json:"name"`
+		Password string `json:"password"`
+	}{}
+	dec := json.NewDecoder(req.Body)
+	if err := dec.Decode(body); err != nil {
+		http.Error(w, "invalid user request JSON body", http.StatusBadRequest)
+		log.Printf("error: decode user request body: %v", err)
+		return
+	}
+	usr, c, err := sh.manager.Register(body.Name, body.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:  sessCookieKey,
+		Value: c,
+	})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(usr); err != nil {
+		log.Printf("error: encode user %v: %v", usr, err)
+	}
+}
+
 func (sh *SessionHandler) login(w http.ResponseWriter, req *http.Request) {
 	body := &struct {
 		Name     string `json:"name"`
@@ -61,7 +90,7 @@ func (sh *SessionHandler) login(w http.ResponseWriter, req *http.Request) {
 	}{}
 	dec := json.NewDecoder(req.Body)
 	if err := dec.Decode(body); err != nil {
-		http.Error(w, "invalid user request body", http.StatusBadRequest)
+		http.Error(w, "invalid user request JSON body", http.StatusBadRequest)
 		log.Printf("error: decode user request body: %v", err)
 		return
 	}
@@ -116,6 +145,8 @@ func (sh *SessionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		sh.login(w, req)
 	case http.MethodDelete:
 		sh.logout(w, req)
+	case http.MethodPut:
+		sh.register(w, req)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("Unsupported method: %s", req.Method)))
