@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -141,6 +142,13 @@ func (m *Manager) ValidSession(enc string) *User {
 // any other User account. If it is, (nil, "", err) is returned, otherwise the
 // new User struct and a session token is returned with nil error.
 func (m *Manager) Register(name, password string) (*User, string, error) {
+	if len(name) == 0 {
+		return nil, "", errors.New("Username must be at least 1 character long")
+	}
+	if len(password) < 4 {
+		return nil, "", errors.New("Password must be at least 4 characters long")
+	}
+
 	m.Lock()
 	defer m.Unlock()
 

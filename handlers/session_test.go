@@ -42,7 +42,7 @@ func TestRegister(t *testing.T) {
 		t.Fatalf("known user: PUT /session: got: %d, want: %d", got, want)
 	}
 
-	req, err = http.NewRequest(http.MethodPut, url, bytes.NewReader([]byte(`{"name":"new","password":"new"}`)))
+	req, err = http.NewRequest(http.MethodPut, url, bytes.NewReader([]byte(`{"name":"newtest","password":"newtest"}`)))
 	if err != nil {
 		t.Fatalf("http.NewRequest: %v", err)
 	}

@@ -30,6 +30,7 @@ func TestRegister(t *testing.T) {
 		saveUser   string
 		activeUser string
 		newUser    string
+		password   string
 	}{
 		// Watch out: Don't use name=test since the test manager already has that.
 		{
@@ -37,6 +38,7 @@ func TestRegister(t *testing.T) {
 			saveUser:   "test1",
 			activeUser: "test2",
 			newUser:    "test3",
+			password:   "test",
 		},
 		{
 			label:      "save conflict",
@@ -44,6 +46,7 @@ func TestRegister(t *testing.T) {
 			saveUser:   "test3",
 			activeUser: "test2",
 			newUser:    "test3",
+			password:   "test",
 		},
 		{
 			label:      "active conflict",
@@ -51,6 +54,7 @@ func TestRegister(t *testing.T) {
 			saveUser:   "test1",
 			activeUser: "test3",
 			newUser:    "test3",
+			password:   "test",
 		},
 		{
 			label:      "both conflict",
@@ -58,6 +62,18 @@ func TestRegister(t *testing.T) {
 			saveUser:   "test3",
 			activeUser: "test3",
 			newUser:    "test3",
+			password:   "test",
+		},
+		{
+			label:    "name too short",
+			wantErr:  true,
+			password: "test",
+		},
+		{
+			label:    "password too short",
+			wantErr:  true,
+			newUser:  "test3",
+			password: "tes",
 		},
 	}
 
@@ -68,19 +84,23 @@ func TestRegister(t *testing.T) {
 				t.Fatalf("CreateTestManager: %v", err)
 			}
 
-			saveFile := m.userSaveFile(test.saveUser)
-			if _, err := os.Create(saveFile); err != nil {
-				t.Fatalf("os.Create(%s): %v", saveFile, err)
+			if len(test.saveUser) > 0 {
+				saveFile := m.userSaveFile(test.saveUser)
+				if _, err := os.Create(saveFile); err != nil {
+					t.Fatalf("os.Create(%s): %v", saveFile, err)
+				}
 			}
 
-			m.active["test"] = &Session{
-				Start: time.Now(),
-				User: &User{
-					Name: test.activeUser,
-				},
+			if len(test.activeUser) > 0 {
+				m.active["test"] = &Session{
+					Start: time.Now(),
+					User: &User{
+						Name: test.activeUser,
+					},
+				}
 			}
 
-			_, _, err = m.Register(test.newUser, "test")
+			_, _, err = m.Register(test.newUser, test.password)
 			if got, want := err != nil, test.wantErr; got != want {
 				t.Errorf("wantErr: err: %v, got: %t, want: %t", err, got, want)
 			}
