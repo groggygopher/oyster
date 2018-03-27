@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/groggygopher/oyster/register"
+	"github.com/groggygopher/oyster/rule"
 )
 
 func TestSerializeDeserialize(t *testing.T) {
@@ -16,6 +17,7 @@ func TestSerializeDeserialize(t *testing.T) {
 				Description: "test",
 			},
 		},
+		manager: rule.NewManager([]*rule.Rule{&rule.Rule{Name: "test"}}),
 	}
 
 	bs, err := usr.Serialize()

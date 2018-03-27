@@ -14,11 +14,26 @@ type Manager struct {
 	rules []*Rule
 }
 
-// NewManager returns a new empty rule Manager.
-func NewManager() *Manager {
+// NewEmptyManager returns a new empty rule Manager.
+func NewEmptyManager() *Manager {
 	return &Manager{
 		rules: []*Rule{},
 	}
+}
+
+// NewManager returns a rule Manager with the given rules.
+func NewManager(rs []*Rule) *Manager {
+	return &Manager{
+		rules: rs,
+	}
+}
+
+// Rules returns a slice of this manager's rules.
+func (m *Manager) Rules() []*Rule {
+	if m == nil {
+		return nil
+	}
+	return m.rules
 }
 
 // AddRule adds a rule to this Manager.

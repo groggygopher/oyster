@@ -15,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/groggygopher/oyster/rule"
 )
 
 const (
@@ -167,6 +169,7 @@ func (m *Manager) Register(name, password string) (*User, string, error) {
 	usr := &User{
 		Name:    name,
 		passkey: passkey,
+		manager: rule.NewEmptyManager(),
 	}
 
 	s := &Session{
@@ -267,6 +270,7 @@ func CreateTestManager() (*Manager, error) {
 	testUsr := &User{
 		Name:    "test",
 		passkey: passkey,
+		manager: rule.NewEmptyManager(),
 	}
 	if err := encodeUser(testUsr, manager.userSaveFile("test")); err != nil {
 		return nil, fmt.Errorf("encodeUser: %v", err)

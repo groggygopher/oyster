@@ -12,11 +12,13 @@ import (
 	"time"
 
 	"github.com/groggygopher/oyster/register"
+	"github.com/groggygopher/oyster/rule"
 )
 
 type serializeableUser struct {
 	Name         string
 	Transactions []*register.Transaction
+	Rules        []*rule.Rule
 }
 
 // DeserializeUser takes the given bytes and decodes a User.
@@ -35,6 +37,7 @@ func DeserializeUser(b []byte) (*User, error) {
 	usr := &User{
 		Name:         serUsr.Name,
 		transactions: serUsr.Transactions,
+		manager:      rule.NewManager(serUsr.Rules),
 	}
 	return usr, nil
 }
@@ -48,6 +51,7 @@ type User struct {
 	passkey []byte
 	// Most recent is at index len() - 1.
 	transactions []*register.Transaction
+	manager      *rule.Manager
 }
 
 // ImportTransactions imports new transactions from the given data, returning
@@ -89,6 +93,7 @@ func (u *User) Serialize() ([]byte, error) {
 	serUsr := &serializeableUser{
 		Name:         u.Name,
 		Transactions: u.transactions,
+		Rules:        u.manager.Rules(),
 	}
 	buf := &bytes.Buffer{}
 	zw := gzip.NewWriter(buf)

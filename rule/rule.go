@@ -30,7 +30,7 @@ type Description struct {
 func (d *Description) UnmarshalJSON(b []byte) error {
 	re, err := regexp.Compile(strings.Trim(string(b), `"`))
 	if err != nil {
-		return fmt.Errorf("not a valid regex: %s", b)
+		return fmt.Errorf("not a valid regex: %s, err: %v", b, err)
 	}
 	*d = Description{r: re}
 	return nil

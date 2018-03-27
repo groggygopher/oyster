@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/groggygopher/oyster/register"
+	"github.com/groggygopher/oyster/rule"
 )
 
 func TestGeneratePasskey(t *testing.T) {
@@ -166,6 +167,7 @@ func TestDecodeEncode(t *testing.T) {
 				Description: "test",
 			},
 		},
+		manager: rule.NewEmptyManager(),
 	}
 	saveDir := filepath.Join(os.TempDir(), "oyster-test")
 	if err := os.RemoveAll(saveDir); err != nil {

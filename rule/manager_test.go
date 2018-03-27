@@ -49,7 +49,7 @@ func TestManagerEvaluate(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.label, func(t *testing.T) {
-			mngr := NewManager()
+			mngr := NewEmptyManager()
 			for _, r := range test.rules {
 				mngr.AddRule(r)
 			}
@@ -75,7 +75,7 @@ func TestManagerEvaluate_SetCategory(t *testing.T) {
 		Category:    category,
 		Description: &Description{regexp.MustCompile("test")},
 	}
-	mngr := NewManager()
+	mngr := NewEmptyManager()
 	mngr.AddRule(rule)
 	changed, err := mngr.Evaluate(trans)
 	if err != nil {
