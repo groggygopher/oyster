@@ -11,14 +11,14 @@ import (
 
 // DateRange is a date range between which a Rule can be evaluated.
 type DateRange struct {
-	After  *time.Time
-	Before *time.Time
+	After  *time.Time `json:"after"`
+	Before *time.Time `json:"before"`
 }
 
 // AmountRange is a dollar amount range between which a Rule can be evaluated.
 type AmountRange struct {
-	Min *float64
-	Max *float64
+	Min *float64 `json:"min"`
+	Max *float64 `json:"max"`
 }
 
 // Description is the Transaction description RE on which a Rule can be evaluated.
@@ -45,14 +45,14 @@ func (d *Description) MarshalJSON() ([]byte, error) {
 // Category. Client code should use a Manager to set the Category of a Transaction when it matches
 // a Rule.
 type Rule struct {
-	Name     string
-	Category string
+	Name     string `json:"name"`
+	Category string `json:"category"`
 
-	And           []*Rule
-	Or            []*Rule
-	Description   *Description
-	DateBetween   *DateRange
-	AmountBetween *AmountRange
+	And           []*Rule      `json:"and"`
+	Or            []*Rule      `json:"or"`
+	Description   *Description `json:"description"`
+	DateBetween   *DateRange   `json:"dateBetween"`
+	AmountBetween *AmountRange `json:"amountBetween"`
 }
 
 // Evaluate checks if the Transaction matches this rule and returns true if so.
