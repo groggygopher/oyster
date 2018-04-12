@@ -117,8 +117,7 @@ func NewManager(saveDir string) *Manager {
 
 // Manager manages the user models and their active state.
 type Manager struct {
-	sync.Mutex
-
+	mu      sync.Mutex
 	saveDir string
 	active  map[string]*Session
 }
@@ -132,8 +131,8 @@ func (m *Manager) userSaveFile(name string) string {
 // ValidSession given a session token produced by Login(), returns the
 // associated User with that token value.
 func (m *Manager) ValidSession(enc string) *User {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if sess, ok := m.active[enc]; ok {
 		return sess.User
 	}
@@ -151,8 +150,8 @@ func (m *Manager) Register(name, password string) (*User, string, error) {
 		return nil, "", errors.New("Password must be at least 4 characters long")
 	}
 
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	errAlreadyExists := fmt.Errorf("There is already a user with name: %s", name)
 	saveFile := m.userSaveFile(name)
@@ -202,16 +201,16 @@ func (m *Manager) Login(name, password string) (*User, string, error) {
 		User:  usr,
 	}
 	enc := s.String()
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.active[enc] = s
 	return usr, enc, nil
 }
 
 // Logout removes the given session token and serializes the user to disk.
 func (m *Manager) Logout(enc string) error {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	sess, ok := m.active[enc]
 	if !ok {
 		return fmt.Errorf("no active session with: %s", enc)
@@ -229,8 +228,8 @@ func (m *Manager) Logout(enc string) error {
 // Close removes all session state from memory, saving it to disk.
 // The Manager should not be used after calling Close().
 func (m *Manager) Close() error {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var errs []string
 	for _, sess := range m.active {
 		err := func() error {

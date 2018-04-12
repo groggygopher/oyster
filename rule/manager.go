@@ -12,8 +12,7 @@ import (
 
 // Manager manages the evaluation of a Transaction against zero or more rules.
 type Manager struct {
-	sync.Mutex
-
+	mu    sync.Mutex
 	rules map[string]*Rule
 }
 
@@ -38,8 +37,8 @@ func (m *Manager) Rules() []*Rule {
 	if m == nil {
 		return nil
 	}
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var rs []*Rule
 	for _, r := range m.rules {
 		rs = append(rs, r)
@@ -50,8 +49,8 @@ func (m *Manager) Rules() []*Rule {
 // AddRule adds a rule to this Manager, returning true if anything was added.
 // Use UpsertRule to modify a rule.
 func (m *Manager) AddRule(r *Rule) bool {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if _, ok := m.rules[r.Name]; ok {
 		return false
 	}
@@ -61,15 +60,15 @@ func (m *Manager) AddRule(r *Rule) bool {
 
 // UpsertRule adds a rule to this Manager, overriding any previous Rules with the same name.
 func (m *Manager) UpsertRule(name string, r *Rule) {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.rules[r.Name] = r
 }
 
 // DeleteRule deletes a rule from this Manager, returning true if anything was removed.
 func (m *Manager) DeleteRule(n string) bool {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if _, ok := m.rules[n]; !ok {
 		return false
 	}
@@ -80,8 +79,8 @@ func (m *Manager) DeleteRule(n string) bool {
 // LoadRules deserializes all the rules in the given Reader and adds them to this Manager. If there
 // is any problem deserializing, no rules are added.
 func (m *Manager) LoadRules(r io.Reader) error {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	dec := json.NewDecoder(r)
 	var rules []*Rule
 	if err := dec.Decode(&rules); err != nil {
@@ -95,8 +94,8 @@ func (m *Manager) LoadRules(r io.Reader) error {
 
 // DumpRules serializes all rules in this manager to the given writer.
 func (m *Manager) DumpRules(w io.Writer) error {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	enc := json.NewEncoder(w)
 	return enc.Encode(m.Rules())
 }
@@ -105,8 +104,8 @@ func (m *Manager) DumpRules(w io.Writer) error {
 // category when a single rule matches. The returned bool will be true if the Transaction was
 // modified. A non-nil error will be returned if multiple rules matched the given Transaction.
 func (m *Manager) Evaluate(t *register.Transaction) (bool, error) {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	var matched []*Rule
 	for _, r := range m.rules {
 		if r.Evaluate(t) {

@@ -44,7 +44,7 @@ func DeserializeUser(b []byte) (*User, error) {
 
 // User is contains all of a User's data.
 type User struct {
-	sync.Mutex
+	mu sync.Mutex
 
 	Name string `json:"name"`
 
@@ -57,8 +57,8 @@ type User struct {
 // ImportTransactions imports new transactions from the given data, returning
 // the number of imported transactions.
 func (u *User) ImportTransactions(newTrans []*register.Transaction) int {
-	u.Lock()
-	defer u.Unlock()
+	u.mu.Lock()
+	defer u.mu.Unlock()
 
 	has := make(map[string]*register.Transaction)
 	for _, t := range u.transactions {
@@ -80,19 +80,20 @@ func (u *User) ImportTransactions(newTrans []*register.Transaction) int {
 
 // Transactions returns a slice of all transactions for this user.
 func (u *User) Transactions() []*register.Transaction {
-	u.Lock()
-	defer u.Unlock()
+	u.mu.Lock()
+	defer u.mu.Unlock()
 	return u.transactions
 }
 
+// RuleManager returns a pointer to this user's rule manager.
 func (u *User) RuleManager() *rule.Manager {
 	return u.manager
 }
 
 // Serialize generates a binary serialization of this User.
 func (u *User) Serialize() ([]byte, error) {
-	u.Lock()
-	defer u.Unlock()
+	u.mu.Lock()
+	defer u.mu.Unlock()
 
 	serUsr := &serializeableUser{
 		Name:         u.Name,
