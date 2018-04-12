@@ -59,27 +59,27 @@ func TestRules(t *testing.T) {
 		},
 		{
 			method:   http.MethodPost,
-			body:     `{"Name":"test"}`,
+			body:     `{"name":"test"}`,
 			wantCode: http.StatusNoContent,
 		},
 		{
 			method:   http.MethodPost,
-			body:     `{"Name":"test"}`,
+			body:     `{"name":"test"}`,
 			wantCode: http.StatusBadRequest,
 		},
 		{
 			method:   http.MethodPut,
-			body:     `{"Name":"test"}`,
+			body:     `{"name":"test"}`,
 			wantCode: http.StatusNoContent,
 		},
 		{
 			method:   http.MethodDelete,
-			body:     `{"Name":"test"}`,
+			body:     `{"name":"test"}`,
 			wantCode: http.StatusNoContent,
 		},
 		{
 			method:   http.MethodDelete,
-			body:     `{"Name":"test"}`,
+			body:     `{"name":"test"}`,
 			wantCode: http.StatusBadRequest,
 		},
 	}
