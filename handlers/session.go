@@ -148,7 +148,7 @@ func (sh *SessionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	case http.MethodPut:
 		sh.register(w, req)
 	default:
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(fmt.Sprintf("Unsupported method: %s", req.Method)))
 	}
 }

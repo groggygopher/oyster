@@ -85,6 +85,10 @@ func (u *User) Transactions() []*register.Transaction {
 	return u.transactions
 }
 
+func (u *User) RuleManager() *rule.Manager {
+	return u.manager
+}
+
 // Serialize generates a binary serialization of this User.
 func (u *User) Serialize() ([]byte, error) {
 	u.Lock()

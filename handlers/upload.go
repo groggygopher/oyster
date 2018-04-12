@@ -31,7 +31,7 @@ func (uh *UploadHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method != http.MethodPost {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(fmt.Sprintf("Unsupported method %s", req.Method)))
 		return
 	}

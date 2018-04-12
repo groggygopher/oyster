@@ -30,7 +30,7 @@ func (th *TransactionsHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 	}
 
 	if req.Method != http.MethodGet {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(fmt.Sprintf("Unsupported method %s", req.Method)))
 		return
 	}

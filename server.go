@@ -45,9 +45,10 @@ func main() {
 		}
 	}()
 
+	http.Handle("/rules", handlers.NewRuleHandler(sessMgr))
 	http.Handle("/session", handlers.NewSessionHandler(sessMgr))
-	http.Handle("/upload", handlers.NewUploadHandler(sessMgr))
 	http.Handle("/transactions", handlers.NewTransactionsHandler(sessMgr))
+	http.Handle("/upload", handlers.NewUploadHandler(sessMgr))
 
 	http.Handle("/", http.FileServer(http.Dir("html")))
 	fmt.Println(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))

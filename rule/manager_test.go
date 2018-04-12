@@ -21,6 +21,7 @@ func TestManagerEvaluate(t *testing.T) {
 			label: "match single rule",
 			rules: []*Rule{
 				{
+					Name:        "1",
 					Description: &Description{regexp.MustCompile("test")},
 				},
 			},
@@ -38,9 +39,11 @@ func TestManagerEvaluate(t *testing.T) {
 			label: "match multiple rules",
 			rules: []*Rule{
 				{
+					Name:        "1",
 					Description: &Description{regexp.MustCompile("test")},
 				},
 				{
+					Name:        "2",
 					Description: &Description{regexp.MustCompile("test")},
 				},
 			},
@@ -94,5 +97,51 @@ func TestManagerEvaluate_SetCategory(t *testing.T) {
 	}
 	if got, want := cat.Amount, amount; got != want {
 		t.Errorf("category amount: got: %f, want: %f", got, want)
+	}
+}
+
+func TestAddRules(t *testing.T) {
+	tests := []struct {
+		label string
+		fill  []*Rule
+		add   *Rule
+		want  bool
+	}{
+		{
+			label: "want false",
+			fill: []*Rule{
+				&Rule{
+					Name: "test",
+				},
+			},
+			add: &Rule{
+				Name: "test",
+			},
+			want: false,
+		},
+		{
+			label: "want true",
+			fill: []*Rule{
+				&Rule{
+					Name: "test",
+				},
+			},
+			add: &Rule{
+				Name: "new",
+			},
+			want: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.label, func(t *testing.T) {
+			m := NewEmptyManager()
+			for _, r := range test.fill {
+				m.AddRule(r)
+			}
+			if got, want := m.AddRule(test.add), test.want; got != want {
+				t.Errorf("AddRule: got: %t, want: %t", got, want)
+			}
+		})
 	}
 }
